@@ -1,0 +1,43 @@
+#!/usr/bin/env php
+<?php
+
+namespace {
+
+    use Dotenv\Dotenv;
+
+    require 'app/Core/App.php';
+
+    define('ABSOLUTE_PATH', getcwd() . DIRECTORY_SEPARATOR);
+
+    App::startErrorReporting();
+    App::setAutoLoader('vendor/autoload');
+
+    App::defineSettings([
+        "mail" => "app/config/mail",
+        "connections" => "app/config/connections",
+        "aliases" => "app/config/aliases",
+    ]);
+
+    App::main(function () {
+        /** @var App $this */
+        $this->import('app/Core/Libraries/globals');
+
+        if ($this->fileExists('.env')) {
+
+            $env = new Dotenv(ABSOLUTE_PATH);
+            $env->load();
+            $this->processConfigs();
+
+            $this->setTimeZone(getenv("TIMEZONE"));
+            try {
+                $this->fireApp();
+            } catch (\Throwable $e) {
+                App::dd($e);
+            }
+        } else {
+            print "no env file".PHP_EOL;
+            exit(1);
+        }
+
+    });
+}

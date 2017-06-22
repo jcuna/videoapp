@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title><?= isset($data->page_title)?$data->page_title:'Framebro'; ?></title>
+    <title><?= isset($data->page_title) ? $data->page_title: App::env("APP_NAME"); ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
     <meta name="Generator" content="Framebro">
     <meta name="Author" content="Jon Cuna">
@@ -23,7 +23,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/"><?=App::env("APP_NAME")?></a>
+                <a class="navbar-brand" href="/api/v1/"><?=App::env("APP_NAME")?></a>
             </div>
             <!-- Collect the nav links, forms, and other content for toggling -->
             <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -33,19 +33,19 @@
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Users<span class="caret"></span></a>
                             <ul class="dropdown-menu" role="menu">
-                                <li><a href="/users/all">All Users</a></li>
-                                <li><a href="/users/create">Create New User</a></li>
+                                <li><a href="/api/v1/users/all">All Users</a></li>
+                                <li><a href="/api/v1/users/create">Create New User</a></li>
                             </ul>
                         </li>
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Admin<span class="caret"></span></a>
                             <ul class="dropdown-menu" role="menu">
-                                <li><a href="/admin">Files</a></li>
-                                <li><a href="/admin/logs">Logs</a></li>
-                                <li><a href="/admin/statusReport">Status Report</a></li>
-                                <li><a href="/admin/showRoutes" target="_blank">Routes</a></li>
-                                <li><a href="/admin/memcachedStats" target="_blank">Memcached Stats</a></li>
-                                <li><a href="/admin/info" target="_blank">System Info</a></li>
+                                <li><a href="/api/v1/admin">Files</a></li>
+                                <li><a href="/api/v1/admin/logs">Logs</a></li>
+                                <li><a href="/api/v1/admin/statusReport">Status Report</a></li>
+                                <li><a href="/api/v1/admin/showRoutes" target="_blank">Routes</a></li>
+                                <li><a href="/api/v1/admin/memcachedStats" target="_blank">Memcached Stats</a></li>
+                                <li><a href="/api/v1/admin/info" target="_blank">System Info</a></li>
                             </ul>
                             <?php endif;?>
                         </li>
@@ -63,9 +63,9 @@
                         <li class="dropdown">
                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><?php echo View::getUser('username'); ?> <span class="caret"></span></a>
                             <ul class="dropdown-menu" role="menu">
-                                <li><a href="/users">Change Password</a></li>
+                                <li><a href="/api/v1/users">Change Password</a></li>
                                 <li class="divider"></li>
-                                <li><a href="/users/logout">Logout</a></li>
+                                <li><a href="/api/v1/users/logout">Logout</a></li>
                             </ul>
                         </li>
                     <?php endif; ?>

@@ -3,10 +3,18 @@ RewriteEngine On
 
 RewriteBase /
 
+# Handle Backend Controller...
+RewriteCond %{REQUEST_URI} ^/api/.* [OR]
+RewriteCond %{REQUEST_URI} ^/oauth/.*
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-l
-RewriteCond %{REQUEST_URI} !=/favicon.ico
+RewriteRule ^ index.php [L]
 
-RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+# Handle Front Controller...
+RewriteCond %{REQUEST_URI} !^/api/.*
+RewriteCond %{REQUEST_URI} !^/(cross|index)\.php$
+RewriteCond %{REQUEST_URI} !.*\.(js|vue|jpg|png|gif|css|ttf|woff|woff2|ico)
+RewriteRule ^ index.html [L]
+
+
 AddDefaultCharset utf-8

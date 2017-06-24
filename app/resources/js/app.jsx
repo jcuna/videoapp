@@ -1,10 +1,28 @@
-import React from 'react';
-import {render} from 'react-dom';
+/**
+ * Created by Jon on 6/22/17.
+ *
+ * This file bootstraps react and all dependencies to the app tree
+ */
 
-class App extends React.Component {
-    render () {
-        return <h1>Soon Video Manager App!</h1>;
+const ReactDOM = require('react-dom');
+
+require('babel-polyfill');
+require('whatwg-fetch');
+require('./css/app.scss');
+
+import { BrowserRouter } from 'react-router-dom';
+import Routes from './Routes.jsx'
+
+class Bootstrap {
+
+    constructor() {
+        ReactDOM.render(
+            <BrowserRouter>
+                <Routes/>
+            </BrowserRouter>,
+            document.querySelector('#app')
+        );
     }
 }
 
-render(<App/>, document.querySelector('#app'));
+new Bootstrap();

@@ -76,6 +76,9 @@ trait Validator
         'boolean',
         'isBool',
         'minimum',
+        'min',
+        'max',
+        'length',
         'number',
         'numeric',
         'integer',
@@ -378,10 +381,45 @@ trait Validator
      * @param array $field
      * use 'field' => ['minimum:8']
      */
+    protected function length($field)
+    {
+        $length = (int) $field[1];
+        if (strlen($this->getFieldValue($field[0])) !== $length) {
+            $this->errors[$field[0]] = "length must be exactly {$length}";
+            $this->validated = false;
+            WebForm::setInvalidFields($field[0]);
+        }
+    }
+
+    /**
+     * @param $field
+     */
+    protected function max($field)
+    {
+        $operation = strlen($this->getFieldValue($field[0]));
+        if (is_numeric($field[0])) {
+            $operation = (int) $field[0];
+        }
+        $max = (int) $field[1];
+        if ($operation > $max) {
+            $this->errors[$field[0]] = ' requires at least ' . $max . ' characters';
+            $this->validated = false;
+            WebForm::setInvalidFields($field[0]);
+        }
+    }
+
+    /**
+     * @param $field
+     */
     protected function minimum($field)
     {
+        $operation = strlen($this->getFieldValue($field[0]));
+        if (is_numeric($field[0])) {
+            $operation = (int) $field[0];
+        }
+
         $minimum = (int) $field[1];
-        if (strlen($this->getFieldValue($field[0])) < $minimum) {
+        if ($operation < $minimum) {
             $this->errors[$field[0]] = ' requires at least ' . $minimum . ' characters';
             $this->validated = false;
             WebForm::setInvalidFields($field[0]);
@@ -725,6 +763,8 @@ trait Validator
             case 'numeric':
                 return call_user_func_array([$this, 'number'], [$arguments]);
         break;
+            case 'min':
+                return call_user_func_array([$this, 'minimum'], [$arguments]);
             default:
                 throw new ControllerException("invalid method $name");
         }

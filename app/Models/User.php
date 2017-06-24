@@ -17,6 +17,14 @@ class User extends Loupe
 
     protected $primaryKey = 'uid';
 
+    protected $without = [];
+
+    public function without(string ...$keys)
+    {
+        $this->without = $keys;
+        return $this;
+    }
+
     /**
      * @param Request $params
      * @return bool
@@ -145,5 +153,13 @@ class User extends Loupe
         $session = App::getRequest()->session;
         $session->destroy();
         return true;
+    }
+
+    public function toArray()
+    {
+        foreach ($this->without as $without) {
+            unset($this->{$without});
+        }
+        return parent::toArray();
     }
 }

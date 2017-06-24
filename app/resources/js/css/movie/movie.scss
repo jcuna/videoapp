@@ -1,0 +1,46 @@
+.holding-spans {
+  height: 344px;
+  font-size: 24px;
+  padding: 78px 10px;
+  background: url("https://reelsandframes.files.wordpress.com/2014/06/cropped-cropped-cropped-cropped-film-reel-31222.png");
+  background-size: cover;
+  background-position: top;
+  background-repeat: no-repeat;
+}
+
+
+:last-child {
+  border-right: none;
+}
+
+.movie-label {
+  font-weight: 600;
+}
+
+.movie-value {
+  float: right;
+}
+
+.movie-edit-link {
+  position: relative;
+  left: 98%;
+}
+.recent-movies {
+  display: block;
+  width: 25%;
+  float: left;
+  height: 150px;
+  padding: 25px;
+  color: #5385c1;
+  border-right: 1px solid #dbdbdb;
+  .btn {
+    margin-top: 10px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .recent-movies {
+    width: 50%
+  }
+}
+

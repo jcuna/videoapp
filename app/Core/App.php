@@ -386,7 +386,11 @@ class App {
     {
         $arguments = $route->getVariables();
         if ($route->getType() === "callableAction") {
-            $reflection = new \ReflectionParameter($route->getEndpoint(), 0);
+            try {
+                $reflection = new \ReflectionParameter($route->getEndpoint(), 0);
+            } catch (\ReflectionException $exception) {
+                $reflection = new \ReflectionParameter(function (Request $request) {}, 0);
+            }
             $this->expectedArguments($arguments, null, [$reflection]);
             return $this->callMethods($route->getEndpoint(), $arguments, $route);
         } else {
@@ -408,7 +412,10 @@ class App {
             $pointcut = $this->getPointcutName("before", $method);
             /** @var BeforeAdvise $filter */
             foreach ($route->getFilters("before") as $filter) {
-                $filter->handler(self::getRequest());
+                $output = $filter->handler(self::getRequest());
+                if (! is_null($output)) {
+                    call_user_func([$this->responseHandler, "render"], $output);
+                }
                 if ($pointcut !== "" && method_exists($filter, $pointcut)) {
                     call_user_func_array([$filter, $pointcut], [self::getRequest()]);
                 }
@@ -420,7 +427,10 @@ class App {
             /** @var AfterAdvise $filter */
             $pointcut = $this->getPointcutName("after", $method);
             foreach ($route->getFilters("after") as $filter) {
-                $filter->exitHandler($output, self::getRequest());
+                $output = $filter->exitHandler($output, self::getRequest());
+                if (! is_null($output)) {
+                    call_user_func([$this->responseHandler, "render"], $output);
+                }
                 if ($pointcut !== "" && method_exists($filter, $pointcut)) {
                     call_user_func_array([$filter, $pointcut], [self::getRequest()]);
                 }
@@ -437,7 +447,7 @@ class App {
      */
     private function getPointcutName(string $type, callable $method): string
     {
-        if (isset($method[0])) {
+        if (! $method instanceof Closure && isset($method[0])) {
             $namespace = explode("\\", get_class($method[0]));
             $class = str_replace("Controller", "", array_pop($namespace));
             return "{$type}{$class}{$method[1]}";
@@ -533,26 +543,40 @@ class App {
 
     public static function dd()
     {
-        Kint::$display_called_from = false;
-        $data = func_num_args() === 1 ? func_get_args()[0] : func_get_args();
-        $currentBuffer = ob_get_clean();
-        ob_start();
-        !Kint::dump($data);
-        $output = $currentBuffer.ob_get_clean();
-        Response::render($output);
-        die(1);
+        if (self::wantsJson()) {
+            Response::render(func_get_args());
+        }
+        call_user_func_array([self::class, "dump"], func_get_args());
+        die;
     }
 
     public static function d()
     {
+        if (self::wantsJson()) {
+            Response::render(func_get_args());
+        }
+        return call_user_func_array([self::class, "dump"], func_get_args());
+    }
+
+    public static function dump() {
         Kint::$display_called_from = false;
         $data = func_num_args() === 1 ? func_get_args()[0] : func_get_args();
         $currentBuffer = ob_get_clean();
         ob_start();
         !Kint::dump($data);
         $output = $currentBuffer.ob_get_clean();
-        Kint::$display_called_from = true;
         Response::render($output);
+    }
+
+    /**
+     * @return bool
+     */
+    public static function wantsJson(): bool
+    {
+        if (isset(self::getRequest()->server["CONTENT_TYPE"])) {
+            return strpos(self::getRequest()->server["CONTENT_TYPE"], "application/json") !== false;
+        }
+        return false;
     }
 
     /**

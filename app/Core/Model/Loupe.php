@@ -625,8 +625,13 @@ abstract class Loupe implements ModelInterface, DatabaseAccessInterface, \Iterat
             $this->created_at = $stamp;
             $this->updated_at = $stamp;
 
-            $attributes->{static::TIME_CREATED} = $this->created_at;
-            $attributes->{static::TIME_UPDATED} = $this->updated_at;
+            if (static::TIME_CREATED !== null) {
+                $attributes->{static::TIME_CREATED} = $this->created_at;
+            }
+
+            if (static::TIME_UPDATED) {
+                $attributes->{static::TIME_UPDATED} = $this->updated_at;
+            }
         }
     }
 

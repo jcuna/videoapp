@@ -15,10 +15,56 @@
 namespace App\Core\Http\Routing {
 
     use \App\Core\Http\View;
+    use App\Core\Request;
+    use App\Models\Format;
+    use App\Models\Movie;
+    use App\Models\User;
     use \App\Services\IsAuthenticated;
 
     Router::group(["prefix" => "api/v1"], function () {
 
+        Router::get("is-logged-in", function (Request $request) {
+
+            if ($request->session->get("user_logged_in")) {
+                return ["data" => true, "status" => 200];
+            } elseif (Request::hasCookie("login_cookie")) {
+                $user = new User();
+                $user->loginWithCookie();
+            }
+            return [
+                "data" => $request->session->get("user_logged_in"),
+                "status" => 200
+            ];
+        });
+        Router::get("movie-formats", function () {
+            return [
+                "status" => 200,
+                "data" => (new Format())->all()->toArray()
+            ];
+        });
+
+        Router::get("all-movies", function (Request $request) {
+            $movies = (new Movie())->order($request->get("sortBy"));
+            if ($request->has("limit")) {
+                $movies->limit($request->get("limit"));
+            }
+            return [
+                "status" => 200,
+                "data" => $movies->get()->toArray()
+            ];
+        });
+
+        Router::post('api-login', 'Users@apiLogin');
+
+        Router::group(["before" => IsAuthenticated::class], function () {
+            Router::put('api-logout', 'Users@apiLogout');
+            Router::post('new-movie', 'Movies@newMovie');
+            Router::post('update-movie/{id}', 'Movies@updateMovie');
+            Router::get('get-movie/{id}', 'Movies@getMovie');
+        });
+
+
+        //These are backend generated views
         Router::all('login', 'Users@login', ['via' => 'login_path']);
 
         Router::group(["before" => IsAuthenticated::class], function () {

@@ -19,15 +19,10 @@ class IsAuthenticated implements BeforeAdvise
     public function handler(Request $request)
     {
         if (! $request->session->get("user_logged_in")) {
-            try {
-                return View::render(
-                    'errors/error', 'Please login before viewing this content',
-                    403
-                );
-            } catch (ViewException $exception) {
-                echo AdminController::getViewData();
-                exit;
-            }
+            return [
+                "status" => 403,
+                "data" => "No valid session"
+            ];
         }
     }
 

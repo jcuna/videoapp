@@ -520,7 +520,6 @@ class Statement {
      */
     public function getWheres()
     {
-
         return " " . implode(" ", $this->wheres) . " ";
     }
 
@@ -632,7 +631,13 @@ class Statement {
     {
         $projection = implode(', ', $projection);
 
-        $statement = $this->getSelect($distinct) . " $projection" . $this->getFrom() . $this->getConditions();
+        $clauses = "";
+        foreach ($this->clauses as $k => $clause) {
+            if (! empty($clause) && $k === "order") {
+                $clauses .= "{$clause} ";
+            }
+        }
+        $statement = $this->getSelect($distinct) . " $projection" . $this->getFrom() . $clauses . $this->getConditions();
 
         //Reset statement
         $this->reboot();
@@ -657,6 +662,7 @@ class Statement {
 
         $partialStatement .= $this->getWheres();
 
+
         $statement = self::UPDATE . " $this->table " . self::SET . " $partialStatement";
 
         $this->reboot();
@@ -674,13 +680,22 @@ class Statement {
      */
     public function getInsert($columnsBindHash)
     {
-        $columns = $this->concatenateStatement($columnsBindHash);
+        $columns = $this->concatenateWithTilda($columnsBindHash);
         $bindings = $this->concatenateStatementKeys($columnsBindHash);
 
         $this->reboot();
 
         return trim(self::INSERT . " $this->table ($columns) " . self::VALUES . " ($bindings)");
 
+    }
+
+    /**
+     * @param $hash
+     * @return string
+     */
+    public function concatenateWithTilda($hash)
+    {
+        return "`" . implode('`, `', $hash) . "`";
     }
 
     /**
@@ -762,12 +777,11 @@ class Statement {
     {
         $statement = '';
         foreach ($columns as $bind => $column) {
-            $statement .= $column . ' = ' . $bind;
+            $statement .= '`'.$column.'`' . ' = ' . $bind;
             if (end($columns) !== $column) {
                 $statement .=  ', ';
             }
         }
-
         return $statement;
     }
 

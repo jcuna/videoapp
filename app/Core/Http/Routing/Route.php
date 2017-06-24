@@ -286,6 +286,8 @@ class Route
      */
     public function match(string $uri)
     {
+        $uri = explode("?", $uri)[0];
+
         if ($uri === $this->route) {
             return true;
         }

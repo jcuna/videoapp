@@ -14,6 +14,44 @@ use App\Core\Request;
 class UsersController extends Controller
 {
 
+    public function apiLogin(Request $request)
+    {
+        $this->validate($request, [
+            'username' => ['required'],
+            'password' => ['required', 'minimum:6']
+        ]);
+
+        if ($this->validated) {
+            $user = new User();
+            $user->with('roles')
+                ->where('username', $request->username)
+                ->groupConcat(['roles.name' => 'roles'])
+                ->get(['users.*']);
+
+            if ($user->count === 1 && $user->Authenticate($request)) {
+                $user = new User();
+                $user->with('roles')
+                    ->where('username', $request->username)
+                    ->groupConcat(['roles.name' => 'roles'])
+                    ->get(['users.*']);
+                return [
+                    "status" => 200,
+                    "data" => $user->without("password", "login_token")->toArray()
+                ];
+            } else {
+                return [
+                    "status" => 403,
+                    "data" => "Wrong username/password combination"
+                ];
+            }
+        } else {
+            return [
+                "status" => 403,
+                "data" => array_values($this->getErrors())
+            ];
+        }
+    }
+
     /**
      * @param string $username
      * @return string
@@ -197,6 +235,22 @@ class UsersController extends Controller
             $this->redirect('/');
         }
     }
+
+    public function apiLogout()
+    {
+        $user = new User();
+        if ( $user->logout() ) {
+            return [
+                "status" => 203,
+                "data" => true
+            ];
+        }
+        return [
+            "status" => 500,
+            "data" => false
+        ];
+    }
+
 
     /**
      * @return string

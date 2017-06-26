@@ -3,8 +3,6 @@
  */
 
 import FormGenerator from '../utils/FormGenerator.jsx';
-import Store from '../stores/store';
-import Event from '../utils/Event.jsx';
 import api from '../utils/api';
 import Notifications from '../utils/Notifications.jsx';
 import ReactStars from 'react-stars'
@@ -14,7 +12,8 @@ export default class NewMovie extends React.Component {
 
     constructor(props) {
         super(props);
-        let options = Store.movieFormats.map(obj => obj.name);
+
+        let options = this.props.formats.map(val => val.name);
         options.push("Select Format");
 
         this.state = {
@@ -28,39 +27,30 @@ export default class NewMovie extends React.Component {
         };
 
         this.validate = this.validate.bind(this);
-        this.gotFormats = this.gotFormats.bind(this);
         this.ratingChanged = this.ratingChanged.bind(this);
+        this.deleteComponent= this.deleteComponent.bind(this);
     }
 
-    gotFormats(formats) {
-        let options = formats.map(obj => obj.name);
-        options.push("Select Format");
-        this.setState({formats: options});
-    }
+    // componentWillReceiveProps(next) {
+    //     let options = next.props.formats;
+    //     options.push("Select Format");
+    //     updateState({formats: options}, this);
+    // }
 
     componentWillMount()
     {
         api(`/api/v1/get-movie/${this.props.match.params.id}`, "get").then(resp => {
-            this.setState({
-                formats: this.state.formats,
+            updateState({
                 selected: resp.data.format,
                 rating: resp.data.rating,
                 title: resp.data.title,
                 length: resp.data.length,
                 release: resp.data.release
 
-            });
+            }, this);
         }, err => {
             console.error(err);
         })
-    }
-
-    componentDidMount() {
-        Event.addListener("gotFormats", this.gotFormats)
-    }
-
-    componentWillUnmount() {
-        Event.removeListener("gotFormats", this.gotFormats)
     }
 
     render() {
@@ -68,12 +58,21 @@ export default class NewMovie extends React.Component {
             return (
                 <div>
                     <Notifications type="error" messages={this.state.notifications}/>
-                    <FormGenerator props={this.getFormProps()}/>
+                    {this.getFormComponent()}
                 </div>
             )
         } else {
-            return <FormGenerator props={this.getFormProps()}/>
+            return this.getFormComponent()
         }
+    }
+
+    getFormComponent() {
+        return (
+            <div>
+                <FormGenerator props={this.getFormProps()}/>
+                <button style={{float: "right"}} className="btn, btn-danger btn-small" onClick={this.deleteComponent}>Delete movie</button>
+            </div>
+        )
     }
 
     getFormProps() {
@@ -125,15 +124,7 @@ export default class NewMovie extends React.Component {
         api(`api/v1/update-movie/${this.props.match.params.id}`, "post", data).then(resp => {
             this.props.history.push(`/movie/${resp.data.mid}`);
         }, err => {
-            this.setState({
-                formats: this.state.formats,
-                selected: this.state.selected,
-                rating: this.state.selected.rating,
-                notifications: err.data,
-                title: this.state.title,
-                length: this.state.length,
-                release: this.state.release
-            });
+            updateState({notifications: err.data}, this);
         });
     }
 
@@ -146,5 +137,13 @@ export default class NewMovie extends React.Component {
                 rating: this.state.rating
             });
         }
+    }
+
+    deleteComponent() {
+        api(`/api/v1/delete-movie/${this.props.match.params.id}`, "post").then(resp => {
+            this.props.history.push("/catalog");
+        }, err => {
+            updateState({notifications: err.data}, err);
+        })
     }
 }

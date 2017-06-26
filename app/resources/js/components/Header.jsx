@@ -3,9 +3,6 @@
  */
 
 import {Link} from 'react-router-dom';
-import api from './utils/api'
-import Store from './stores/store';
-import Event from './utils/Event.jsx'
 
 require('../css/header.scss');
 
@@ -13,42 +10,21 @@ export default class Header extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            isLoggedIn: false,
-            user: {}
+            isLoggedIn: this.props.isLoggedIn,
+            user: this.props.user
         };
-        this.userDidLogIn = this.userDidLogIn.bind(this);
-        this.userDidLogOut = this.userDidLogOut.bind(this);
     }
 
-    componentDidMount() {
-        Event.addListener("userDidLogIn", this.userDidLogIn);
-        Event.addListener("userDidLogOut", this.userDidLogOut);
+    componentWillReceiveProps(next) {
+        updateState({
+            isLoggedIn: next.isLoggedIn,
+            user: next.user
+        }, this);
     }
 
-    componentWillMount() {
-        const promises = [
-            api("/api/v1/is-logged-in", "get"),
-            api("/api/v1/movie-formats", "get")
-        ];
-
-        Promise.all(promises).then(resp => {
-            this.setState({
-                isLoggedIn: resp[0].data === true,
-                user: {}//TODO fetch user
-            });
-            Event.emit("gotFormats", resp[1].data);
-            Store.isLoggedIn = resp[0].data === true;
-            Store.movieFormats = resp[1].data;
-        }, err => {
-            console.error(err);
-        })
-    }
-    componentWillUnmount() {
-        this.loginAction.removeListener("userDidLogIn", this.userDidLogIn);
-        this.loginAction.removeListener("userDidLogOut", this.userDidLogOut);
-    }
     render () {
         let isLoggedIn = this.state.isLoggedIn;
+        let name = this.state.user.fname;
         return (
             <header id="header" className="container">
                 <div className="inner">
@@ -60,7 +36,10 @@ export default class Header extends React.Component {
                         <Link to="/find-movie">Find movies</Link>
                         <Link to="/catalog">Catalog</Link>
                         <span>|</span>
-                        <Link to={isLoggedIn ? "/logout": "/login"}>{isLoggedIn ? "logout": "login"}</Link>
+                        <Link to={isLoggedIn ? "/logout": "/login"}>
+                            <span>{isLoggedIn ? `${name}`: "login"}</span>
+                            {isLoggedIn && <i className="user-logout fa fa-sign-out"></i>}
+                        </Link>
                     </nav>
                     <Link to="#navPanel" className="navPanelToggle"><span className="fa fa-bars"></span></Link>
                 </div>
@@ -70,18 +49,5 @@ export default class Header extends React.Component {
                 </section>
             </header>
         );
-    }
-
-    userDidLogIn(user) {
-        this.setState({
-            isLoggedIn: true,
-            user: user
-        });
-    }
-    userDidLogOut() {
-        this.setState({
-            isLoggedIn: false,
-            user: {}
-        });
     }
 }

@@ -14,6 +14,55 @@ use App\Core\Request;
 class UsersController extends Controller
 {
 
+    public function apiFBLogin(Request $request)
+    {
+        $this->validate($request, [
+            'email' => ['required'],
+            'name' => ['required', 'minimum:6']
+        ]);
+
+        if ($this->validated) {
+            $count = (new User())->where("username", $request->get("email"))->count();
+            if ($count === 0) {
+                list ($fname, $lname) = explode(" ", $request->name);
+                $user = new User();
+                $user->username = $request->get("email");
+                $user->email = $request->get("email");
+                $user->fname = $fname;
+                $user->lname = $lname;
+                if (! $user->save()) {
+                    return [
+                        "status" => 403,
+                        "data" => "An error occurred while logging you in"
+                    ];
+                } else {
+                    $role = (new Role())->where("name", "Authenticated User")->first(["id"]);
+                    $user->morphTo('roles')->save([ 'user_id' => $user->lastId, 'role_id' => $role->id]);
+                }
+            }
+            $user = $this->getUser($request->get("email"))->createSession();
+
+            return [
+                "status" => 200,
+                "data" =>  $this->getUser($request->get("email"))->without("password", "login_token")->toArray()
+            ];
+        }
+
+        return [
+            "status" => 403,
+            "data" => array_values($this->getErrors())
+        ];
+
+    }
+
+    private function getUser($email)
+    {
+        return (new User())->with('roles')
+            ->where('username', $email)
+            ->groupConcat(['roles.name' => 'roles'])
+            ->first(['users.*']);
+    }
+
     public function apiLogin(Request $request)
     {
         $this->validate($request, [
@@ -26,7 +75,7 @@ class UsersController extends Controller
             $user->with('roles')
                 ->where('username', $request->username)
                 ->groupConcat(['roles.name' => 'roles'])
-                ->get(['users.*']);
+                ->first(['users.*']);
 
             if ($user->count === 1 && $user->Authenticate($request)) {
                 $user = new User();
@@ -44,12 +93,11 @@ class UsersController extends Controller
                     "data" => "Wrong username/password combination"
                 ];
             }
-        } else {
-            return [
-                "status" => 403,
-                "data" => array_values($this->getErrors())
-            ];
         }
+        return [
+            "status" => 403,
+            "data" => array_values($this->getErrors())
+        ];
     }
 
     /**
@@ -189,7 +237,7 @@ class UsersController extends Controller
                 $user->with('roles')
                     ->where('username', $params->username)
                     ->groupConcat(['roles.name' => 'roles'])
-                    ->get(['users.*']);
+                    ->first(['users.*']);
             } catch (ModelException $exception) {
                 if ($exception->getCode() === 1146) {
                     \Kint::$display_called_from = false;

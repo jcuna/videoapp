@@ -3,8 +3,6 @@
  */
 
 import FormGenerator from '../utils/FormGenerator.jsx';
-import Store from '../stores/store';
-import Event from '../utils/Event.jsx';
 import api from '../utils/api';
 import Notifications from '../utils/Notifications.jsx';
 import ReactStars from 'react-stars'
@@ -14,7 +12,7 @@ export default class NewMovie extends React.Component {
 
     constructor(props) {
         super(props);
-        let options = Store.movieFormats.map(obj => obj.name);
+        let options = this.props.formats.map(val => val.name);
         options.push("Select Format");
 
         this.state = {
@@ -24,23 +22,9 @@ export default class NewMovie extends React.Component {
         };
 
         this.validate = this.validate.bind(this);
-        this.gotFormats = this.gotFormats.bind(this);
         this.ratingChanged = this.ratingChanged.bind(this);
     }
 
-    gotFormats(formats) {
-        let options = formats.map(obj => obj.name);
-        options.push("Select Format");
-        this.setState({formats: options});
-    }
-
-    componentDidMount() {
-        Event.addListener("gotFormats", this.gotFormats)
-    }
-
-    componentWillUnmount() {
-        Event.removeListener("gotFormats", this.gotFormats)
-    }
 
     render() {
         if (this.state.notifications !== undefined) {

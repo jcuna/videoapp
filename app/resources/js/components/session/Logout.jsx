@@ -18,7 +18,7 @@ export default class Logout extends React.Component {
     }
 
     render() {
-        <Spinner/>
+        return <Spinner/>
     }
 
 }

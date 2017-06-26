@@ -5,7 +5,6 @@
 import Spinner from '../utils/Spinner.jsx';
 import api from '../utils/api';
 import ReactStars from 'react-stars'
-import Store from '../stores/store';
 import {Link} from 'react-router-dom';
 
 require("../../css/movie/movie.scss");
@@ -14,38 +13,48 @@ export default class Movie extends React.Component {
 
     constructor(props) {
         super(props);
-
         this.state = {
-            component: <Spinner/>
+            component: <Spinner/>,
+            isLoggedIn: this.props.isLoggedIn,
+            data: {}
         }
     }
 
     render() {
-        return this.state.component
+        if (this.state.data.title === undefined) {
+            return this.state.component
+        } else {
+            let data = this.state.data;
+            return (
+                <div>
+                    {this.state.isLoggedIn &&
+                    <span style={{fontSize: "24px"}}><Link className="movie-edit-link" to={`/movie/${data.mid}/edit`}><i className="fa fa-pencil"></i></Link></span>}
+                    <div style={{textAlign: "center"}}>
+                        <h2>{data.title}</h2>
+                    </div>
+                    <div className="holding-spans">
+                        <div><span className="movie-label">Format</span><span className="movie-value">{data.format}</span></div>
+                        <div><span className="movie-label">Length</span><span className="movie-value">{this.getFormattedTime(data.length)}</span></div>
+                        <div><span className="movie-label">Release Year</span><span className="movie-value">{data.release}</span></div>
+                        <div><span className="movie-label">Rating</span><span className="movie-value">
+                            <ReactStars value={data.rating} size={24} edit={false} count={5} />
+                        </span></div>
+                    </div>
+                </div>
+            )
+        }
     }
 
     componentWillMount() {
         api(`/api/v1/get-movie/${this.props.match.params.id}`, "get").then(resp => {
-            this.setState({
-                component: (
-                    <div className="holding-spans">
-                        {Store.isLoggedIn && <span><Link className="movie-edit-link" to={`/movie/${resp.data.mid}/edit`}><i className="fa fa-pencil"></i></Link></span>}
-                        <div><span className="movie-label">Title</span><span className="movie-value">{resp.data.title}</span></div>
-                        <div><span className="movie-label">Format</span><span className="movie-value">{resp.data.format}</span></div>
-                        <div><span className="movie-label">Length</span><span className="movie-value">{this.getFormattedTime(resp.data.length)}</span></div>
-                        <div><span className="movie-label">Release Year</span><span className="movie-value">{resp.data.release}</span></div>
-                        <div><span className="movie-label">Rating</span><span className="movie-value">
-                            <ReactStars value={resp.data.rating} size={24} edit={false} count={5} />
-                        </span></div>
-                    </div>
-                )
-            })
-
+            updateState({data: resp.data}, this);
         }, err => {
-            this.setState({
-                component: <div>Movie not found</div>
-            })
+            updateState({component: <div>Movie not found</div>}, this);
         });
+    }
+
+    componentWillReceiveProps(next) {
+        updateState({isLoggedIn: next.isLoggedIn}, this);
     }
 
     getFormattedTime(time) {

@@ -19,7 +19,8 @@ export default class Home extends React.Component {
             <div className="home-movies">
                 <h3>Recent Movies</h3>
                 {this.state.movies.length === 0 && <Spinner/>}
-                {this.state.movies.length > 0 && this.getMovies()}
+                {this.state.movies.length > 0 &&
+                <div>{this.getMovies()}<Link style={this.getMoreButtonStyle()} to="/catalog">...All movies</Link></div>}
             </div>
         )
     }
@@ -37,7 +38,7 @@ export default class Home extends React.Component {
     }
 
     componentWillMount() {
-        api('/api/v1/all-movies?sortBy=created_at&limit=8', "get").then(resp => {
+        api('/api/v1/all-movies?sortBy=created_at&direction=DESC&limit=8', "get").then(resp => {
             this.setState({
                 movies: resp.data
             });
@@ -45,5 +46,14 @@ export default class Home extends React.Component {
         }, err => {
             console.error(err);
         });
+    }
+
+    getMoreButtonStyle() {
+        return {
+            clear: "both",
+            float: "left",
+            display: "block",
+            margin: "30px 25px"
+        }
     }
 }

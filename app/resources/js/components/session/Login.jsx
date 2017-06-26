@@ -14,8 +14,22 @@ export default class Login extends React.Component {
         super(props);
         this.state = {
             messages: <div></div>,
-            renderObject: this.getForm()
+            renderObject: this.getForm(),
+            isLogged: this.props.session.isLoggedIn
         };
+
+        this.facebookResponse = this.facebookResponse.bind(this);
+    }
+    componentWillMount() {
+        if (this.props.session.isLoggedIn) {
+            this.props.history.push("/");
+        }
+    }
+
+    componentWillReceiveProps(next) {
+        if (next.session.isLoggedIn) {
+            this.props.history.push("/");
+        }
     }
 
     getFormProps() {
@@ -81,10 +95,9 @@ export default class Login extends React.Component {
             <div className="container">
                 <div style={this.getFacebookStyles()}>
                     <FacebookLogin
-                        appId="1088597931155576"
-                        autoLoad={true}
+                        appId="302032240207743"
+                        autoLoad={false}
                         fields="name,email,picture"
-                        onClick={this.facebookLogin}
                         callback={this.facebookResponse}
                         size="small"
                         icon="fa-facebook"
@@ -97,12 +110,13 @@ export default class Login extends React.Component {
         )
     }
 
-    facebookLogin() {
-
-    }
-
-    facebookResponse() {
-
+    facebookResponse(fbUser) {
+        api("/api/v1/fb-login", "post", fbUser).then(resp => {
+            Event.emit("userDidLogIn", resp.data);
+            this.props.history.push("/");
+        }, err => {
+            console.error(err);
+        })
     }
 
     getFacebookStyles() {

@@ -24,18 +24,18 @@ namespace App\Core\Http\Routing {
     Router::group(["prefix" => "api/v1"], function () {
 
         Router::get("is-logged-in", function (Request $request) {
-
             if ($request->session->get("user_logged_in")) {
-                return ["data" => true, "status" => 200];
+                return ["data" => $request->session->all(), "status" => 200];
             } elseif (Request::hasCookie("login_cookie")) {
                 $user = new User();
                 $user->loginWithCookie();
             }
             return [
-                "data" => $request->session->get("user_logged_in"),
+                "data" => $request->session->all(),
                 "status" => 200
             ];
         });
+
         Router::get("movie-formats", function () {
             return [
                 "status" => 200,
@@ -44,7 +44,13 @@ namespace App\Core\Http\Routing {
         });
 
         Router::get("all-movies", function (Request $request) {
-            $movies = (new Movie())->order($request->get("sortBy"));
+
+            $direction = "ASC";
+            if ($request->has("direction")) {
+                $direction = $request->get("direction");
+            }
+            $order = "{$request->get("sortBy")} {$direction}";
+            $movies = (new Movie())->order($order);
             if ($request->has("limit")) {
                 $movies->limit($request->get("limit"));
             }
@@ -54,13 +60,20 @@ namespace App\Core\Http\Routing {
             ];
         });
 
+        Router::get('get-movie/{id}', 'Movies@getMovie');
+
         Router::post('api-login', 'Users@apiLogin');
+
+        /** We can only allow people to log through facebook when coming from same origin url */
+        //Router::group(["before" => IsSameOrigin::class], function () {
+        Router::post('fb-login', 'Users@apiFBLogin');
+        //});
 
         Router::group(["before" => IsAuthenticated::class], function () {
             Router::put('api-logout', 'Users@apiLogout');
             Router::post('new-movie', 'Movies@newMovie');
             Router::post('update-movie/{id}', 'Movies@updateMovie');
-            Router::get('get-movie/{id}', 'Movies@getMovie');
+            Router::post('delete-movie/{id}', 'Movies@deleteMovie');
         });
 
 
@@ -93,7 +106,7 @@ namespace App\Core\Http\Routing {
             );
         });
 
-//When a page is missing.
+        //When a page is missing.
         Router::missing(function () {
             return View::render('errors/error', "The requested page doesn't exist", 404);
         });

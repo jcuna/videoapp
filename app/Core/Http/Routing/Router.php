@@ -93,9 +93,16 @@ class Router
     public static function group(array $options, callable $callable)
     {
         $current = self::$groupOptions;
-        self::$groupOptions = array_merge(self::$groupOptions, $options);
+        if (isset($current["prefix"])) {
+            if (isset($options["prefix"])) {
+                $options["prefix"] = $current["prefix"] + $options["prefix"];
+            } else {
+                $options["prefix"] = $current["prefix"];
+            }
+        }
+        self::$groupOptions = $options;
         $callable();
-        self::$groupOptions[] = $current;
+        self::$groupOptions = $current;
     }
 
     /**

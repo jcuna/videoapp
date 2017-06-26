@@ -4,7 +4,6 @@
 
 import api from '../utils/api';
 import ReactStars from 'react-stars';
-import Store from '../stores/store';
 import {Link} from 'react-router-dom';
 
 
@@ -15,21 +14,25 @@ export default class Catalog extends React.Component {
 
         this.state = {
             movies: [],
+            loggedIn: this.props.session.isLoggedIn,
+            direction: "ASC"
         };
         this.sortBy = this.sortBy.bind(this);
     }
 
+    componentWillReceiveProps(next) {
+        updateState({loggedIn: next.session.isLoggedIn}, this);
+    }
+
     componentWillMount() {
         api('/api/v1/all-movies?sortBy=mid', "get").then(resp => {
-            this.setState({
-                movies: resp.data
-            });
-
+            let state = this.state;
+            state.movies = resp.data;
+            this.setState(state);
         }, err => {
             console.error(err);
         });
     }
-
     render() {
         return (
             <table className="table">
@@ -40,7 +43,7 @@ export default class Catalog extends React.Component {
                     <th data="format" onClick={this.sortBy} className="sortable">Format</th>
                     <th data="length" onClick={this.sortBy} className="sortable">Length</th>
                     <th data="rating" onClick={this.sortBy} className="sortable">Rating</th>
-                    {Store.isLoggedIn && <th>Edit</th>}
+                    {this.state.loggedIn && <th>Edit</th>}
                 </tr>
                 </thead>
                 <tbody>
@@ -52,10 +55,13 @@ export default class Catalog extends React.Component {
 
     sortBy(e) {
         let column = e.currentTarget.getAttribute("data");
-        api(`/api/v1/all-movies?sortBy=${column}`, "get").then(resp => {
-            this.setState({
-                movies: resp.data
-            });
+        let direction = this.state.direction;
+        api(`/api/v1/all-movies?sortBy=${column}&direction=${direction}`, "get").then(resp => {
+           direction = direction === "ASC" ? "DESC" : "ASC";
+           updateState({
+               movies: resp.data,
+               direction: direction
+           }, this);
         }, err => {
             console.error(err);
         });
@@ -69,7 +75,7 @@ export default class Catalog extends React.Component {
                 <td>{m.format}</td>
                 <td>{this.getFormattedTime(m.length)}</td>
                 <td><ReactStars value={m.rating} size={24} edit={false} count={5} /></td>
-                {Store.isLoggedIn && <th><Link to={`/movie/${m.mid}/edit`}><i className="fa fa-pencil"></i></Link></th>}
+                {this.state.loggedIn && <th><Link to={`/movie/${m.mid}/edit`}><i className="fa fa-pencil"></i></Link></th>}
             </tr>
         );
     }

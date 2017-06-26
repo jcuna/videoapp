@@ -4,24 +4,21 @@
  * This file bootstraps react and all dependencies to the app tree
  */
 
+import updateState from './components/stores/State';
+
 const ReactDOM = require('react-dom');
+
+window.updateState = global.updateState = updateState;
 
 require('babel-polyfill');
 require('whatwg-fetch');
-require('./css/app.scss');
 
-import { BrowserRouter } from 'react-router-dom';
-import Routes from './Routes.jsx'
+import Layout from './components/Layout.jsx'
 
 class Bootstrap {
 
     constructor() {
-        ReactDOM.render(
-            <BrowserRouter>
-                <Routes/>
-            </BrowserRouter>,
-            document.querySelector('#app')
-        );
+        ReactDOM.render(<Layout/>, document.querySelector('#app'));
     }
 }
 

@@ -56,6 +56,19 @@ class Session
     }
 
     /**
+     * @return array
+     */
+    public function all()
+    {
+        $data = [];
+        foreach ($_SESSION as $key => $item) {
+            $data[$key] = $item;
+        }
+
+        return $data;
+    }
+
+    /**
      * deletes the session (= logs the user out)
      */
     public function destroy()

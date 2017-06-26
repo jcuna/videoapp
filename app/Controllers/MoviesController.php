@@ -90,7 +90,7 @@ class MoviesController extends Controller
 
         $movie = (new Movie())->find($id);
 
-        if (! is_null($movie)) {
+        if ($movie->count === 1) {
             foreach ($data as $key => $value) {
                 $movie->{$key} = $value;
             }
@@ -107,4 +107,20 @@ class MoviesController extends Controller
         ];
     }
 
+    public function deleteMovie($id)
+    {
+        $movie = (new Movie())->find($id);
+        if ($movie->count !== 1) {
+            return [
+                "status" => 403,
+                "data" => "movie not found"
+            ];
+        }
+
+        $deleted = $movie->delete();
+            return [
+            "status" => $deleted ? 200 : 500,
+            "data" => $deleted
+        ];
+    }
 }

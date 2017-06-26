@@ -31,7 +31,7 @@ namespace App\Core\Http\Routing {
                 $user->loginWithCookie();
             }
             return [
-                "data" => $request->session->all(),
+                "data" => $request->session->get("user_logged_in") ? $request->session->all() : false,
                 "status" => 200
             ];
         });

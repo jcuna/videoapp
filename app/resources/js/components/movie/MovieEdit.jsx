@@ -80,10 +80,10 @@ export default class NewMovie extends React.Component {
         let vals = this.state;
         return {
             elements: [
-                {type: 'text', placeholder: 'Title', onChange: this.validate, value: vals.title},
-                {type: 'select', placeholder: 'Format', onChange: this.validate, formElement: "select", value: this.state.selected, options: options},
-                {type: 'number', placeholder: 'Length', onChange: this.validate, value: vals.length},
-                {type: 'number', placeholder: 'Release year', onChange: this.validate, value: vals.release},
+                {name: "title", type: 'text', placeholder: 'Title', onChange: this.validate, value: vals.title},
+                {name: "format", type: 'select', placeholder: 'Format', onChange: this.validate, formElement: "select", value: this.state.selected, options: options},
+                {name: "length", type: 'number', placeholder: 'Length', onChange: this.validate, value: vals.length},
+                {name: "release", type: 'number', placeholder: 'Release year', onChange: this.validate, value: vals.release},
                 <ReactStars value={this.state.rating} key={100} size={24} onChange={this.ratingChanged} count={5} />
             ],
             formName: 'edit-movie',
@@ -129,14 +129,10 @@ export default class NewMovie extends React.Component {
     }
 
     validate(e) {
-        if (e.currentTarget.type === "select-one") {
-            this.setState({
-                formats: this.state.formats,
-                notifications: this.state.notifications,
-                selected: e.currentTarget.value,
-                rating: this.state.rating
-            });
-        }
+        const name = e.currentTarget.name;
+        this.setState({
+            [name]: e.currentTarget.value
+        });
     }
 
     deleteComponent() {

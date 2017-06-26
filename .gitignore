@@ -9,3 +9,5 @@ vendor
 composer.lock
 .env
 node_modules
+public/js
+public/css

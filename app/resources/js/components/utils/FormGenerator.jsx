@@ -61,6 +61,7 @@ export default class FormGenerator extends React.Component {
                 return React.createElement('div', {className: 'form-group', key: k},
                     React.createElement(formElement, {
                         type: b.type,
+                        name: b.name,
                         placeholder: b.placeholder,
                         className: b.className === undefined ? className : `${className} ${b.className}`,
                         onChange: b.onChange,

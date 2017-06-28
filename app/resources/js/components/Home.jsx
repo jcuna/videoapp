@@ -29,7 +29,7 @@ export default class Home extends React.Component {
         return (
                 this.state.movies.map((m, k) =>
                 <div key={k} className="recent-movies">
-                    <span>{m.title}</span>
+                    <span className="movie-title">{m.title}</span>
                     <span><ReactStars value={m.rating} size={24} edit={false} count={5} /></span>
                     <Link to={`/movie/${m.mid}`} className="btn btn-info btn-sm">Read more</Link>
                 </div>

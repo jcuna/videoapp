@@ -37,7 +37,7 @@ export default class Header extends React.Component {
                     }
                     <Link to="/find-movie" onClick={this.toggleMobileMenu}>Find movies</Link>
                     <Link to="/catalog" onClick={this.toggleMobileMenu}>Catalog</Link>
-                    <Link to={isLoggedIn ? "/logout": "/login"}>
+                    <Link to={isLoggedIn ? "/logout": "/login"}  onClick={this.toggleMobileMenu}>
                         <span>{isLoggedIn ? `${name}`: "login"}</span>
                         {isLoggedIn && <i className="user-logout fa fa-sign-out"></i>}
                     </Link>

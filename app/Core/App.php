@@ -544,7 +544,8 @@ class App {
     public static function dd()
     {
         if (self::wantsJson()) {
-            Response::render(func_get_args());
+            $args = func_num_args() === 1 ? func_get_arg(0) : func_get_args();
+            Response::render($args);
         }
         call_user_func_array([self::class, "dump"], func_get_args());
         die;
@@ -553,14 +554,15 @@ class App {
     public static function d()
     {
         if (self::wantsJson()) {
-            Response::render(func_get_args());
+            $args = func_num_args() === 1 ? func_get_arg(0) : func_get_args();
+            Response::render($args);
         }
         return call_user_func_array([self::class, "dump"], func_get_args());
     }
 
     public static function dump() {
         Kint::$display_called_from = false;
-        $data = func_num_args() === 1 ? func_get_args()[0] : func_get_args();
+        $data = func_num_args() === 1 ? func_get_arg(1) : func_get_args();
         $currentBuffer = ob_get_clean();
         ob_start();
         !Kint::dump($data);

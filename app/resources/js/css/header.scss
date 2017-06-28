@@ -47,6 +47,43 @@
       }
     }
   }
+
+
+  .mobile-menu {
+    position: absolute;
+    background: #5385c1;
+    height: 100%;
+    width: 50%;
+    right: 0;
+    z-index: 10000;
+    text-align: right;
+    font-size: 25px;
+    a {
+      color: #fff;
+    }
+    .fa {
+      cursor: pointer;
+      float: right;
+      padding: 10px;
+      &:hover {
+        opacity: 0.5;
+      }
+    }
+    #mobile-nav {
+      text-align: left;
+      clear: both;
+      font-weight: 500;
+      padding: 20px;
+      a {
+        display: block;
+        padding: 10px;
+        border-top: solid 1px rgba(255, 255, 255, 0.25);
+        color: #d4e0ef;
+      }
+
+    }
+  }
+
   #banner {
     padding-top: 50px;
     height: 200px;

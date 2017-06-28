@@ -38,9 +38,16 @@
   }
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 994px) {
   .recent-movies {
-    width: 50%
+    width: 50%;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .recent-movies {
+    width: 100%;
+    border-right: none;
   }
 }
 

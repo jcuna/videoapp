@@ -28,7 +28,18 @@ class ExceptionHandler
             if (App::hasExceptionHandler()) {
                 App::getExceptionHandler()->report($this->exception);
             } else {
-                App::dd($this->exception);
+                $dump = $this->exception;
+                if (\App::wantsJson()) {
+                    $dump = [
+                        "status" => 500,
+                        "data" => [
+                            "message" => $dump->getMessage(),
+                            "file" => $dump->getFile(),
+                            "line" => $dump->getLine(),
+                        ]
+                    ];
+                }
+                App::dd($dump);
             }
         }
     }

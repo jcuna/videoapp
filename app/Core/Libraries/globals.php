@@ -132,3 +132,12 @@ if (! function_exists("sd")) {
         die(1);
     }
 }
+
+if (! function_exists("jd")) {
+    Kint::$aliases[] = 'jd';
+    function jd() {
+        $args = func_num_args() === 1 ? func_get_arg(0) : func_get_args();
+        \App\Core\Http\Response::render($args);
+        die(1);
+    }
+}

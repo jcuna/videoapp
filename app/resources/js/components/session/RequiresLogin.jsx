@@ -3,8 +3,16 @@
  */
 
 export default class RequiresLogin extends React.Component {
-    componentDidMount() {
-        if (! this.props.isLoggedIn) {
+
+    constructor(props) {
+        super(props);
+
+        this.currentPath = this.props.location.pathname
+
+    }
+
+    componentWillReceiveProps(next) {
+        if (! next.isLoggedIn) {
             this.redirect();
         }
     }
@@ -21,5 +29,6 @@ export default class RequiresLogin extends React.Component {
     redirect() {
         this.props.history.push("/login");
     }
-
 }
+
+RequiresLogin.prototype.currentPath = "";

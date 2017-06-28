@@ -11,15 +11,43 @@ export default class Header extends React.Component {
         super(props);
         this.state = {
             isLoggedIn: this.props.isLoggedIn,
-            user: this.props.user
+            user: this.props.user,
+            showMobile: false
         };
+
+        this.toggleMobileMenu = this.toggleMobileMenu.bind(this);
     }
 
     componentWillReceiveProps(next) {
-        updateState({
+        this.setState({
             isLoggedIn: next.isLoggedIn,
             user: next.user
-        }, this);
+        });
+    }
+
+    getMobileMenu() {
+        let isLoggedIn = this.state.isLoggedIn;
+        let name = this.state.user.fname;
+        return (
+            <div className="mobile-menu">
+                <i onClick={this.toggleMobileMenu} className="fa fa-times" aria-hidden="true"></i>
+                <nav id="mobile-nav">
+                    {isLoggedIn &&
+                    <Link to="/new-movie" onClick={this.toggleMobileMenu}>Add movie</Link>
+                    }
+                    <Link to="/find-movie" onClick={this.toggleMobileMenu}>Find movies</Link>
+                    <Link to="/catalog" onClick={this.toggleMobileMenu}>Catalog</Link>
+                    <Link to={isLoggedIn ? "/logout": "/login"}>
+                        <span>{isLoggedIn ? `${name}`: "login"}</span>
+                        {isLoggedIn && <i className="user-logout fa fa-sign-out"></i>}
+                    </Link>
+                </nav>
+            </div>
+        )
+    }
+
+    toggleMobileMenu() {
+        this.setState({showMobile: ! this.state.showMobile});
     }
 
     render () {
@@ -27,6 +55,7 @@ export default class Header extends React.Component {
         let name = this.state.user.fname;
         return (
             <header id="header" className="container">
+                { this.state.showMobile && this.getMobileMenu() }
                 <div className="inner">
                     <Link to="/" className="logo">Home</Link>
                     <nav id="nav">
@@ -41,7 +70,9 @@ export default class Header extends React.Component {
                             {isLoggedIn && <i className="user-logout fa fa-sign-out"></i>}
                         </Link>
                     </nav>
-                    <Link to="#navPanel" className="navPanelToggle"><span className="fa fa-bars"></span></Link>
+                    <a className="navPanelToggle" onClick={this.toggleMobileMenu}>
+                        <span className="fa fa-bars"></span>
+                    </a>
                 </div>
                 <section id="banner">
                     <h1>Movie Manager by Jon Garcia</h1>

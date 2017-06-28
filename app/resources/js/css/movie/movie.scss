@@ -38,6 +38,20 @@
   }
 }
 
+.youtube-trailers {
+  text-align: center;
+  font-weight: 600;
+  ul {
+    list-style: none;
+    padding: 0;
+
+    li {
+      display: inline-block;
+      padding: 10px;
+    }
+  }
+}
+
 @media screen and (max-width: 994px) {
   .recent-movies {
     width: 50%;

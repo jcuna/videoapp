@@ -6,6 +6,7 @@ import Spinner from '../utils/Spinner.jsx';
 import api from '../utils/api';
 import ReactStars from 'react-stars'
 import {Link} from 'react-router-dom';
+import GoogleApi from '../utils/GoogleApi';
 
 require("../../css/movie/movie.scss");
 
@@ -16,7 +17,8 @@ export default class Movie extends React.Component {
         this.state = {
             component: <Spinner/>,
             isLoggedIn: this.props.isLoggedIn,
-            data: {}
+            data: {},
+            trailers: []
         }
     }
 
@@ -40,6 +42,16 @@ export default class Movie extends React.Component {
                             <ReactStars value={data.rating} size={24} edit={false} count={5} />
                         </span></div>
                     </div>
+                    {this.state.trailers.length > 0 && (
+                        <div className="youtube-trailers">
+                            <h3>Watch most popular trailers</h3>
+                            <ul>{this.state.trailers.map((videoId, i) =>
+                                <li className="youtube-video" key={i}>
+                                    <iframe width="420" height="220" src={`https://www.youtube.com/embed/${videoId}`} frameBorder="0" allowFullScreen></iframe>
+                                </li>
+                            )}</ul>
+                        </div>
+                    )}
                 </div>
             )
         }
@@ -48,6 +60,7 @@ export default class Movie extends React.Component {
     componentWillMount() {
         api(`/api/v1/get-movie/${this.props.match.params.id}`, "get").then(resp => {
             updateState({data: resp.data}, this);
+            this.searchMovieTrailer(resp.data.title);
         }, err => {
             updateState({component: <div>Movie not found</div>}, this);
         });
@@ -63,6 +76,16 @@ export default class Movie extends React.Component {
         let h = hours > 1 ? "hours" : "hour";
         let m = minutes > 1 ? ` & ${minutes} minutes` : minutes > 0 ? `& ${minutes} minute` : "";
         return hours < 1 ? `${minutes} minutes` : `${hours} ${h} ${m}`;
+    }
+
+
+    searchMovieTrailer(title) {
+        GoogleApi.search(`${title} movie trailer`).then(resp => {
+            let trailers = resp.items.map(item => item.id.videoId);
+            this.setState({trailers: trailers})
+        }, err => {
+            console.erro(err);
+        })
     }
 
 }

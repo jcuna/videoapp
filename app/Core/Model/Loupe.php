@@ -722,7 +722,7 @@ abstract class Loupe implements ModelInterface, DatabaseAccessInterface, \Iterat
 
             $this->count = intval($action->rowCount());
 
-            if (is_null($this->attributes->{$this->primaryKey})) {
+            if (is_null($this->{$this->primaryKey})) {
                 $this->lastId = $conn->lastInsertId();
                 $this->{$this->primaryKey} = $this->lastId;
             }
